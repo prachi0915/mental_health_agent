@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MindMate - Mental Health Companion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6ec6ca;
+      --primary-light: #e0f7fa;
+      --primary-dark: #00796b;
+      --background: #f6fafd;
+      --card-bg: #ffffffcc;
+      --shadow: 0 4px 24px rgba(110,198,202,0.10);
+      --border-radius: 18px;
+      --mood-happy: #ffe082;
+      --mood-sad: #b3e5fc;
+      --mood-angry: #ffab91;
+      --mood-anxious: #b39ddb;
+      --mood-tired: #cfd8dc;
+      --mood-grateful: #c8e6c9;
+      --mood-neutral: #e0e0e0;
+    }
+    body {
+      font-family: 'Nunito', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--background) 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      transition: background 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    #chatbox {
+      max-width: 480px;
+      margin: 40px auto 0 auto;
+      background: var(--card-bg);
+      padding: 32px 28px 24px 28px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: background 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s;
+      animation: fadeInUp 0.7s;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      text-align: center;
+      color: var(--primary-dark);
+      margin-bottom: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    #daily-tip {
+      margin-bottom: 18px;
+      font-style: italic;
+      color: var(--primary-dark);
+      background: var(--primary-light);
+      padding: 10px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #b2ebf2;
+      text-align: center;
+      font-size: 1.05em;
+    }
+    #mood-section {
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      background: #f9fbe7;
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 4px #e0e0e0;
+    }
+    #mood-section label {
+      font-weight: 600;
+      color: #333;
+      margin-right: 6px;
+    }
+    #mood {
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 1em;
+      background: #fff;
+      transition: border 0.2s;
+    }
+    #mood:focus {
+      border: 1.5px solid var(--primary-dark);
+      outline: none;
+    }
+    #mood-section button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #b2ebf2;
+    }
+    #mood-section button:hover {
+      background: var(--primary-dark);
+    }
+    #mood-msg {
+      font-size: 0.98em;
+      font-weight: 500;
+    }
+    #mood-history {
+      margin-bottom: 18px;
+      background: #f9fbe7;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px #e0e0e0;
+      font-size: 1em;
+    }
+    #mood-history ul {
+      margin: 8px 0 0 0;
+      padding: 0 0 0 18px;
+    }
+    #mood-chart {
+      margin-bottom: 18px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px #e0e0e0;
+      padding: 8px;
+    }
+    #messages {
+      min-height: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-bottom: 18px;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+    .message {
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .user {
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 2px;
+    }
+    .bot {
+      background: var(--primary-light);
+      color: #333;
+      padding: 12px 16px;
+      border-radius: 12px 12px 12px 0;
+      box-shadow: 0 1px 4px #b2ebf2;
+      font-size: 1.05em;
+      margin-left: 18px;
+      align-self: flex-start;
+      transition: background 0.3s;
+    }
+    .message.bot {
+      align-items: flex-start;
+    }
+    .message .user {
+      align-self: flex-end;
+      margin-right: 18px;
+    }
+    .suggestion-card {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-left: 6px solid var(--primary);
+      border-radius: 12px;
+      margin: 12px 0 8px 0;
+      padding: 14px 18px;
+      font-size: 1.08em;
+      box-shadow: 0 2px 8px #b2ebf2;
+      animation: fadeIn 0.7s;
+    }
+    input[type="text"] {
+      width: 75%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1em;
+      margin-right: 8px;
+      transition: border 0.2s;
+      background: #fff;
+    }
+    input[type="text"]:focus {
+      border: 1.5px solid var(--primary-dark);
+      outline: none;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #b2ebf2;
+    }
+    button:hover {
+      background: var(--primary-dark);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 600px) {
+      #chatbox { padding: 16px 4vw; }
+      input[type="text"] { width: 100%; margin-bottom: 10px; }
+      button { width: 100%; margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <h2>🧠 MindMate – Your Mental Health Companion</h2>
+    <div id="daily-tip"></div>
+    <div id="mood-section">
+      <label for="mood">How are you feeling?</label>
+      <select id="mood">
+        <option value="">Select mood</option>
+        <option value="😊">😊 Happy</option>
+        <option value="😐">😐 Neutral</option>
+        <option value="😔">😔 Sad</option>
+        <option value="😠">😠 Angry</option>
+        <option value="😰">😰 Anxious</option>
+        <option value="😴">😴 Tired</option>
+        <option value="😇">😇 Grateful</option>
+      </select>
+      <button onclick="submitMood()">Submit Mood</button>
+      <span id="mood-msg"></span>
+      <button onclick="showMoodHistory()">Show Mood History</button>
+      <button onclick="resetMood()" style="background:#bdbdbd;color:#333;">Reset Mood</button>
+    </div>
+    <div id="mood-history" style="display:none;"></div>
+    <canvas id="mood-chart" style="display:none;"></canvas>
+    <div id="messages"></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="input" placeholder="How are you feeling today?" />
+      <button onclick="send()">Send</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Fetch and display daily tip
+    fetch('/daily-tip').then(r=>r.json()).then(data=>{
+      document.getElementById('daily-tip').textContent = '🌱 Daily Tip: ' + data.tip;
+    });
+
+    async function send() {
+      const input = document.getElementById("input");
+      const msg = input.value;
+      if (!msg.trim()) return;
+
+      const messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML += `<div class="message"><span class="user">You:</span> ${msg}</div>`;
+      input.value = "";
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await response.json();
+      messagesDiv.innerHTML += `<div class="message bot">${data.response}</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      // If a mood was detected from chat, update the UI
+      if (data.detected_mood) {
+        setMoodTheme(data.detected_mood);
+        showMoodNotification(data.detected_mood);
+      }
+    }
+
+    async function submitMood() {
+      const mood = document.getElementById('mood').value;
+      const msg = document.getElementById('mood-msg');
+      if (!mood) { msg.textContent = 'Please select a mood.'; msg.style.color = 'red'; return; }
+      const res = await fetch('/mood', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood })
+      });
+      const data = await res.json();
+      if (data.success) {
+        msg.textContent = 'Mood saved!'; msg.style.color = 'green';
+        // Mood-based color changes
+        setMoodTheme(mood);
+        // Show mood-specific greeting in chat
+        if (data.greeting) {
+          const messagesDiv = document.getElementById('messages');
+          messagesDiv.innerHTML += `<div class="message bot">${data.greeting}</div>`;
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        // Show mood-specific suggestion card
+        if (data.suggestion) {
+          const messagesDiv = document.getElementById('messages');
+          messagesDiv.innerHTML += `<div class='suggestion-card'>💡 ${data.suggestion}</div>`;
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+      } else {
+        msg.textContent = 'Error saving mood.'; msg.style.color = 'red';
+      }
+    }
+
+    async function resetMood() {
+      const res = await fetch('/mood/reset', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setMoodTheme();
+        document.getElementById('mood-msg').textContent = 'Mood reset! AI will now detect your mood from chat.';
+        document.getElementById('mood-msg').style.color = '#00796b';
+      }
+    }
+
+    // Mood-based color theme logic
+    function setMoodTheme(mood) {
+      const root = document.documentElement;
+      let color = '';
+      switch(mood) {
+        case '😊': color = 'var(--mood-happy)'; break;
+        case '😐': color = 'var(--mood-neutral)'; break;
+        case '😔': color = 'var(--mood-sad)'; break;
+        case '😠': color = 'var(--mood-angry)'; break;
+        case '😰': color = 'var(--mood-anxious)'; break;
+        case '😴': color = 'var(--mood-tired)'; break;
+        case '😇': color = 'var(--mood-grateful)'; break;
+        default: color = 'var(--primary-light)';
+      }
+      document.body.style.background = `linear-gradient(135deg, ${color} 0%, var(--background) 100%)`;
+      document.getElementById('chatbox').style.boxShadow = `0 4px 32px 0 ${color}55`;
+    }
+
+    async function showMoodHistory() {
+      const historyDiv = document.getElementById('mood-history');
+      const chartCanvas = document.getElementById('mood-chart');
+      if (historyDiv.style.display === 'block') {
+        historyDiv.style.display = 'none';
+        chartCanvas.style.display = 'none';
+        return;
+      }
+      const res = await fetch('/mood/history');
+      const data = await res.json();
+      if (data.moods && data.moods.length) {
+        // List with source icons
+        historyDiv.innerHTML = '<b>Your Recent Moods:</b><ul>' +
+          data.moods.map(m=>{
+            const icon = m.source === 'manual' ? '🖐️' : '🤖';
+            const color = m.source === 'manual' ? '#6ec6ca' : '#b39ddb';
+            return `<li><span style='font-size:1.1em;'>${m.mood}</span> <span style='color:${color};font-size:0.95em;'>${icon} ${m.source}</span> <span style='color:#888;font-size:0.9em;'>(${new Date(m.timestamp).toLocaleString()})</span></li>`;
+          }).join('') + '</ul>';
+        // Prepare data for chart
+        const labels = data.moods.map(m=>new Date(m.timestamp).toLocaleDateString()+" "+new Date(m.timestamp).toLocaleTimeString()).reverse();
+        const moodMap = {"😊":1,"😇":2,"😐":3,"😴":4,"😰":5,"😔":6,"😠":7};
+        const moodLabels = {1:"😊 Happy",2:"😇 Grateful",3:"😐 Neutral",4:"😴 Tired",5:"😰 Anxious",6:"😔 Sad",7:"😠 Angry"};
+        const dataPoints = data.moods.map(m=>moodMap[m.mood]||0).reverse();
+        const bgColors = data.moods.map(m=>m.source==='manual'?"#6ec6ca":"#b39ddb").reverse();
+        chartCanvas.style.display = 'block';
+        if(window.moodChart) window.moodChart.destroy();
+        window.moodChart = new Chart(chartCanvas, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Mood Trend',
+              data: dataPoints,
+              fill: false,
+              borderColor: '#00796b',
+              backgroundColor: bgColors,
+              pointBackgroundColor: bgColors,
+              tension: 0.2,
+              pointRadius: 6,
+              pointHoverRadius: 8
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 1,
+                max: 7,
+                ticks: {
+                  callback: function(value) { return moodLabels[value]||''; },
+                  stepSize: 1
+                },
+                title: { display: true, text: 'Mood' }
+              },
+              x: {
+                title: { display: true, text: 'Time' },
+                ticks: { maxTicksLimit: 7 }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    const idx = ctx.dataIndex;
+                    const mood = data.moods[data.moods.length-1-idx];
+                    const moodLabel = moodLabels[ctx.parsed.y]||'';
+                    const src = mood.source==='manual'?"🖐️ manual":"🤖 detected";
+                    return `${moodLabel} (${src})`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        historyDiv.innerHTML = 'No mood history yet.';
+        chartCanvas.style.display = 'none';
+      }
+      historyDiv.style.display = 'block';
+    }
+    // Show a notification when mood is detected from chat
+    function showMoodNotification(mood) {
+      const moodNames = {"😊":"Happy","😐":"Neutral","😔":"Sad","😠":"Angry","😰":"Anxious","😴":"Tired","😇":"Grateful"};
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML += `<div class='suggestion-card'>🤖 I sensed you might be feeling <b>${moodNames[mood]||mood}</b> based on your message. If this isn't right, you can select your mood above!</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html> 
